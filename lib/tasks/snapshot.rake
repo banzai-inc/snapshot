@@ -90,15 +90,15 @@ DESC
 
       # If the database is not empty, prompt for confirmation before destroying the
       # existing data.
-      conn.tables.each do |table|
-        next if table == "schema_migrations"
-        if conn.select_value("SELECT count(*) FROM #{conn.quote_table_name(table)}").to_i > 0
-          puts "This database is not empty. Are you sure you want to erase it and load the snapshot? [y/n]"
-          answer = STDIN.gets || ""
-          abort "aborting without restoring the snapshot" unless answer.strip == "y"
-          break
-        end
-      end
+      # conn.tables.each do |table|
+      #  next if table == "schema_migrations"
+      #  if conn.select_value("SELECT count(*) FROM #{conn.quote_table_name(table)}").to_i > 0
+      #    puts "This database is not empty. Are you sure you want to erase it and load the snapshot? [y/n]"
+      #    answer = STDIN.gets || ""
+      #    abort "aborting without restoring the snapshot" unless answer.strip == "y"
+      #    break
+      #  end
+      # end
 
       # load the original schema
       load("#{from}.schema")
@@ -135,6 +135,9 @@ DESC
 
           conn.insert_sql(pfx + values.join(",") + sfx)
         end
+        
+        # Update auto_increment on Postgres
+        conn.execute("SELECT pg_catalog.setval(pg_get_serial_sequence(#{table_name}, 'id'), (SELECT MAX(id) FROM #{table_name})+1);")
       end
 
       DBSnapshot.restore!(from)
