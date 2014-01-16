@@ -137,7 +137,7 @@ DESC
         end
         
         # Update auto_increment on Postgres
-        conn.execute("SELECT pg_catalog.setval(pg_get_serial_sequence(#{table_name}, 'id'), (SELECT MAX(id) FROM #{table_name})+1);")
+        conn.execute("SELECT pg_catalog.setval(pg_get_serial_sequence('#{table_name}', 'id'), (SELECT MAX(id) FROM #{table_name})+1);")
       end
 
       DBSnapshot.restore!(from)
